@@ -11,8 +11,13 @@ app.use(protocolMiddleware);
 app.get('/', async (req, res) => {
   let url = res.locals.url;
   let response = await fetch(url);
-  let body = await response.text();
-  res.send(preparePage(body, url));
+
+  if (response.headers.get('content-type') != 'text/vnd.wap.wml') {
+    res.send('Это не WML страница');
+  } else {
+    let body = await response.text();
+    res.send(preparePage(body, url));
+  }
 });
 
 app.get('/img', async (req, res) => {
