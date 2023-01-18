@@ -1,3 +1,6 @@
+import * as dotenv from 'dotenv'
+dotenv.config()
+
 const host = process.env['host'];
 
 export const preparePage = (html, url) => {
@@ -19,7 +22,7 @@ const updateHref = (html, url) => {
 const updateSrc = (html, url) => {
   return html.replace(/src="(.*?)"/g, (match, $1) => {
     if (!$1.startsWith('http')) {
-      return `src="${host}/img?url=${url}/${$1}"`;
+      return `src="/img?url=${url}/${$1}"`;
     }
   })
 }
