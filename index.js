@@ -4,23 +4,36 @@ import { preparePage } from './parse.js';
 
 const app = express();
 
-const emptyUrlHandler = (req, res, next) => {
+const emptyUrlMiddleware = (req, res, next) => {
+  let url = req.query.url;
   if (req.query.url == null) {
-    res.send("Пришлите строку");
+    res.send('Пришлите строку');
   } else {
+    res.locals.url = url;
     next();
   }
 }
 
-app.get('/', emptyUrlHandler, async (req, res) => {
-  let url = req.query.url;
+const protocolMiddleware = (req, res, next) => {
+  let url = res.locals.url;
+  if (!url.startsWith("http")) {
+    res.locals.url = "http://" + url;
+  }
+  next();
+}
+
+app.use(emptyUrlMiddleware);
+app.use(protocolMiddleware);
+
+app.get('/', async (req, res) => {
+  let url = res.locals.url;
   let response = await fetch(url);
   let body = await response.text();
   res.send(preparePage(body, url));
 });
 
-app.get('/img', emptyUrlHandler, async (req, res) => {
-  let url = req.query.url;
+app.get('/img', async (req, res) => {
+  let url = res.locals.url;
   let response = await fetch(url);
   let contentType = response.headers.get('content-type');
   
