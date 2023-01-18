@@ -4,37 +4,33 @@ import { preparePage } from './parse.js';
 
 const app = express();
 
-app.get('/', async (req, res) => {
-  let url = req.query.url;
-  if (url == null) {
-    res.send("Пришлите строку")
+const emptyUrlHandler = (req, res, next) => {
+  if (req.query.url == null) {
+    res.send("Пришлите строку");
   } else {
-    try {
-      let response = await fetch(url);
-      let body = await response.text();
-      res.send(preparePage(body, url));
-    } catch (e) {
-      console.log(e);
-      res.send('Произошла ошибка');
-    }
+    next();
   }
+}
+
+app.get('/', emptyUrlHandler, async (req, res) => {
+  let url = req.query.url;
+  let response = await fetch(url);
+  let body = await response.text();
+  res.send(preparePage(body, url));
 });
 
-app.get('/img', async (req, res) => {
+app.get('/img', emptyUrlHandler, async (req, res) => {
   let url = req.query.url;
-  if (url == null) {
-    res.send("Пришлите строку")
-  } else {
-    try {
-      let response = await fetch(url);
-      let contentType = response.headers.get('content-type');
-      res.writeHead(200, { 'Content-Type': contentType });
-      res.end(await response.buffer());
-    } catch (e) {
-      console.log(e);
-      res.send('Произошла ошибка');
-    }
-  }
+  let response = await fetch(url);
+  let contentType = response.headers.get('content-type');
+  
+  res.writeHead(200, { 'Content-Type': contentType });
+  res.end(await response.buffer()); // deprecated, надо пробовать другое
+});
+
+app.use(function(err, req, res, next) {
+  console.error(err.stack);
+  res.status(500).send('Something broke!');
 });
 
 app.listen(3000);
