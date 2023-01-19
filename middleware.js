@@ -1,3 +1,5 @@
+import { host } from './config.js';
+
 export const emptyUrlMiddleware = (req, res, next) => {
   let url = req.query.url;
   if (req.query.url == null) {
@@ -14,6 +16,15 @@ export const protocolMiddleware = (req, res, next) => {
     res.locals.url = "http://" + url;
   }
   next();
+};
+
+export const refererMiddleware = (req, res, next) => {
+  let referer = req.get('Referer');
+  if (referer == null || !referer.startsWith(host)) {
+    res.status(500).send('Нет доступа');
+  } else {
+    next();
+  }
 };
 
 export const errorHandlerMiddleware = (err, req, res, next) => {

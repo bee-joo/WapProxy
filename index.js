@@ -1,7 +1,7 @@
 import express from 'express';
 import fetch from 'node-fetch';
 import { preparePage } from './parse.js';
-import { emptyUrlMiddleware, protocolMiddleware, errorHandlerMiddleware } from './middleware.js';
+import { emptyUrlMiddleware, protocolMiddleware, errorHandlerMiddleware, refererMiddleware } from './middleware.js';
 
 const app = express();
 
@@ -20,7 +20,7 @@ app.get('/', async (req, res) => {
   }
 });
 
-app.get('/img', async (req, res) => {
+app.get('/img', refererMiddleware, async (req, res) => { // сделать без referer (например через cookie)
   let url = res.locals.url;
   let response = await fetch(url);
   let contentType = response.headers.get('content-type');
