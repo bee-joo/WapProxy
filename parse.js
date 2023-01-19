@@ -1,7 +1,4 @@
-import * as dotenv from 'dotenv'
-dotenv.config()
-
-const host = process.env['host'];
+import { host } from './config.js';
 
 export const preparePage = (html, url) => {
   return updateHref(updateSrc(html, url), url)
